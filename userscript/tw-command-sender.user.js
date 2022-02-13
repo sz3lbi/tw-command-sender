@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name tw-command-sender
-// @version 1.0.0
+// @version 1.0.1
 // @description Automatic command sender for the Tribal Wars game
 // @author szelbi
 // @homepage https://github.com/sz3lbi/tw-command-sender
@@ -134,14 +134,12 @@ var CommandSender = {
         serverInfoParagraph === null || serverInfoParagraph === void 0 ? void 0 : serverInfoParagraph.prepend(footerSpan);
     },
 };
-window.addEventListener("load", function () {
-    var url = window.location.href;
-    var urlRegex = /^.*:\/\/.*\/game\.php.*screen=place.*try=confirm.*$/;
-    if (urlRegex.test(url)) {
-        CommandSender.init();
-        CommandSender.addFooter();
-    }
-});
+var url = window.location.href;
+var urlRegex = /^.*:\/\/.*\/game\.php.*screen=place.*try=confirm.*$/;
+if (urlRegex.test(url)) {
+    CommandSender.init();
+    CommandSender.addFooter();
+}
 
 })();
 

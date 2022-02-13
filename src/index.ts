@@ -145,12 +145,10 @@ const CommandSender: CommandSender = {
   },
 };
 
-window.addEventListener("load", () => {
-  const url = window.location.href;
-  const urlRegex = /^.*:\/\/.*\/game\.php.*screen=place.*try=confirm.*$/;
+const url = window.location.href;
+const urlRegex = /^.*:\/\/.*\/game\.php.*screen=place.*try=confirm.*$/;
 
-  if (urlRegex.test(url)) {
-    CommandSender.init();
-    CommandSender.addFooter();
-  }
-});
+if (urlRegex.test(url)) {
+  CommandSender.init();
+  CommandSender.addFooter();
+}
