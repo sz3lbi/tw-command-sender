@@ -21,7 +21,7 @@ After installation of the Tampermonkey, go to [the script file](https://raw.gith
 If nothing happens, you can click on the Tampermonkey icon in your browser bar, then "Create a new script" and replace the whole content of the new opened window with the one you copy from the `*.user.js` file.  
 Remember to save the script. Then you can close the tab.
 
-After installation of the script, you should click on the Tampermonkey icon in your browser bar, then "Dashboard" and the name of the script installed which is `tw-command-sender`. Switch from the "Editor" tab to the "Settings" one and **be sure to check the "Check for updates" checkbox** in the "Updates" section. If you don't do that, your script will not update to the latest version when it's released!
+After installation of the script, you should click on the Tampermonkey icon in your browser bar, then "Dashboard" and the name of the script installed which is `tw-command-sender`. Switch from the "Editor" tab to the "Settings" one and **be sure to check the "Check for updates" checkbox** in the "Updates" section. If you don't do that, your script will not update to the latest version when it's released! Remember to click the "Save" button below before you close the tab.
 
 ## Translations
 
