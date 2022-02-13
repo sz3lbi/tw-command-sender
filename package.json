@@ -35,6 +35,8 @@
     ],
     "grant": [
       "unsafeWindow"
-    ]
+    ],
+    "downloadURL": "https://raw.githubusercontent.com/sz3lbi/tw-command-sender/master/userscript/tw-command-sender.user.js",
+    "updateURL": "https://raw.githubusercontent.com/sz3lbi/tw-command-sender/master/userscript/tw-command-sender.user.js"
   }
 }
