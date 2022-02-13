@@ -5,7 +5,6 @@ import { generateHeader } from "./plugins/userscript";
 
 const config: Configuration = {
   mode: "none",
-  devtool: "inline-source-map",
   entry: {
     main: "./src/index.ts",
   },
