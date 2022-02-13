@@ -6,7 +6,7 @@
 // @homepage https://github.com/sz3lbi/tw-command-sender
 // @updateURL https://raw.githubusercontent.com/sz3lbi/tw-command-sender/master/userscript/tw-command-sender.user.js
 // @downloadURL https://raw.githubusercontent.com/sz3lbi/tw-command-sender/master/userscript/tw-command-sender.user.js
-// @match */game.php*
+// @match *://*/*
 // @grant unsafeWindow
 // ==/UserScript==
 

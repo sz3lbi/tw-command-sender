@@ -31,7 +31,7 @@
     "license": "https://opensource.org/licenses/MIT",
     "require-template": "https://cdn.jsdelivr.net/npm/${dependencyName}@${dependencyVersion}",
     "match": [
-      "*/game.php*"
+      "*://*/*"
     ],
     "grant": [
       "unsafeWindow"
