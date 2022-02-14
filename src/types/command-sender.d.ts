@@ -1,8 +1,11 @@
-export interface CommandSender {
+import { DateTime } from "luxon";
+
+interface CommandSender {
   //parameters
   prefix: string;
   //methods
   init(prefix?: string): void;
+  createTimeTypeRadioGroup(groupName: string): HTMLDivElement;
   createDateTimeInput(): HTMLInputElement;
   createOffsetInput(): HTMLInputElement;
   createConfirmButton(): HTMLInputElement;
@@ -13,7 +16,6 @@ export interface CommandSender {
   ): HTMLDivElement;
   setDateTime(dateTimeInput: HTMLInputElement): void;
   setOffset(offsetInput: HTMLInputElement): void;
-  getDateTimeString(date: Date): string;
-  getDateObject(dateTimeLocalValue: string): Date;
+  getDateTimeObject(dateTimeLocalValue: string): DateTime;
   addFooter(): void;
 }

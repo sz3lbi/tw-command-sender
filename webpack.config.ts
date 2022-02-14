@@ -13,7 +13,7 @@ const config: Configuration = {
     filename: "tw-command-sender.user.js",
   },
   resolve: {
-    extensions: [".ts", ".d.ts"],
+    extensions: [".ts", ".js"],
   },
   module: {
     rules: [
@@ -24,7 +24,9 @@ const config: Configuration = {
       },
     ],
   },
-  externals: {},
+  externals: {
+    luxon: "luxon",
+  },
   plugins: [
     new BannerPlugin({
       banner: generateHeader(),
