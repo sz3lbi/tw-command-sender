@@ -1,6 +1,4 @@
-import { DateTime } from "luxon";
-
-interface CommandSender {
+export interface CommandSender {
   //parameters
   prefix: string;
   //methods
@@ -16,6 +14,5 @@ interface CommandSender {
   ): HTMLDivElement;
   setDateTime(dateTimeInput: HTMLInputElement): void;
   setOffset(offsetInput: HTMLInputElement): void;
-  getDateTimeObject(dateTimeLocalValue: string): DateTime;
   addFooter(): void;
 }

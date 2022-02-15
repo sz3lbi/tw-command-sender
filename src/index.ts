@@ -1,6 +1,6 @@
 /// <reference types="./types/tampermonkey" />
 
-import { DateTime } from "luxon";
+import { DateTime, Duration } from "luxon";
 import { CommandSender } from "./types/command-sender";
 
 const CommandSender: CommandSender = {
@@ -43,18 +43,19 @@ const CommandSender: CommandSender = {
     }
 
     confirmSettingsButton.addEventListener("click", () => {
-      const time = this.getDateTimeObject(dateTimeInput.value);
-
       const offsetValue = Number(offsetInput.value);
       localStorage.setItem(offsetInput.id, offsetValue.toString());
 
       confirmButton.classList.add("btn-disabled");
 
-      let timeout = time
-        .plus({
-          milliseconds: unsafeWindow.Timing.getCurrentServerTime(),
-        })
-        .plus({ milliseconds: offsetValue });
+      const attackDateTime = DateTime.fromISO(dateTimeInput.value);
+      const serverDateTime = DateTime.fromMillis(
+        unsafeWindow.Timing.getCurrentServerTime()
+      );
+      let timeoutDuration = attackDateTime.diff(serverDateTime);
+
+      const offset = Duration.fromMillis(offsetValue);
+      timeoutDuration = timeoutDuration.plus(offset);
 
       const checkedRadio = timeTypeGroupDiv.querySelector(
         "input[type='radio']:checked"
@@ -63,26 +64,30 @@ const CommandSender: CommandSender = {
         const dateArrivalTd = commandDataForm.querySelector(
           "td[id='date_arrival']"
         );
-        const durationTr =
+        const attackDurationTr =
           dateArrivalTd?.parentElement?.parentElement?.querySelectorAll(
             "tr"
           )[3];
-        const durationTd = durationTr?.querySelectorAll("td")[1];
-        const durationString = durationTd?.textContent;
+        const attackDurationTd = attackDurationTr?.querySelectorAll("td")[1];
+        const attackDurationString = attackDurationTd?.textContent;
 
-        if (!durationString) {
+        if (!attackDurationString) {
           return;
         }
-
-        const duration = DateTime.fromISO(durationString);
-        timeout.plus(duration);
+        const attackDurationArray = attackDurationString.split(":").map(Number);
+        const attackDuration = Duration.fromObject({
+          hours: attackDurationArray[0],
+          minutes: attackDurationArray[1],
+          seconds: attackDurationArray[2],
+        });
+        timeoutDuration = timeoutDuration.minus(attackDuration.toMillis());
       }
 
       setTimeout(() => {
         if (confirmButton instanceof HTMLElement) {
           confirmButton.click();
         }
-      }, timeout.toMillis());
+      }, timeoutDuration.toMillis());
 
       confirmSettingsButton.disabled = true;
     });
@@ -92,6 +97,18 @@ const CommandSender: CommandSender = {
     radioGroupDiv.textContent = "Which time do you want to specify?";
 
     radioGroupDiv.append(document.createElement("br"));
+
+    const arrivalTimeRadio = document.createElement("input");
+    arrivalTimeRadio.type = "radio";
+    arrivalTimeRadio.name = groupName;
+    arrivalTimeRadio.id = `${groupName}_arrival`;
+    arrivalTimeRadio.checked = true;
+    const arrivalTimeLabel = document.createElement("label");
+    arrivalTimeLabel.htmlFor = arrivalTimeRadio.id;
+    arrivalTimeLabel.textContent = "Arrival time";
+
+    radioGroupDiv.append(arrivalTimeRadio);
+    radioGroupDiv.append(arrivalTimeLabel);
 
     const sendTimeRadio = document.createElement("input");
     sendTimeRadio.type = "radio";
@@ -103,17 +120,6 @@ const CommandSender: CommandSender = {
 
     radioGroupDiv.append(sendTimeRadio);
     radioGroupDiv.append(sendTimeLabel);
-
-    const arrivalTimeRadio = document.createElement("input");
-    arrivalTimeRadio.type = "radio";
-    arrivalTimeRadio.name = groupName;
-    arrivalTimeRadio.id = `${groupName}_arrival`;
-    const arrivalTimeLabel = document.createElement("label");
-    arrivalTimeLabel.htmlFor = arrivalTimeRadio.id;
-    arrivalTimeLabel.textContent = "Arrival time";
-
-    radioGroupDiv.append(arrivalTimeRadio);
-    radioGroupDiv.append(arrivalTimeLabel);
 
     return radioGroupDiv;
   },
@@ -170,8 +176,9 @@ const CommandSender: CommandSender = {
   },
   setDateTime: function (dateTimeInput) {
     const now = DateTime.now();
-    const iso = now.toUTC().toISO();
-    dateTimeInput.value = iso.slice(0, -1);
+    const isoOptions = { includeOffset: false };
+    const iso = now.toISO(isoOptions);
+    dateTimeInput.value = iso;
   },
   setOffset: function (offsetInput) {
     const offsetInputId = offsetInput.id;
@@ -180,9 +187,6 @@ const CommandSender: CommandSender = {
     }
     const offsetValue = localStorage.getItem(offsetInputId) || "-250";
     offsetInput.value = offsetValue;
-  },
-  getDateTimeObject: function (dateTimeLocalValue) {
-    return DateTime.fromISO(dateTimeLocalValue).toLocal();
   },
   addFooter: function () {
     const serverInfoParagraph = document.querySelector(

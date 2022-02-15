@@ -59,7 +59,6 @@ var luxon_1 = __webpack_require__(1);
 var CommandSender = {
     prefix: "command_sender",
     init: function (prefix) {
-        var _this = this;
         if (prefix !== undefined) {
             this.prefix = prefix;
         }
@@ -83,32 +82,36 @@ var CommandSender = {
         }
         confirmSettingsButton.addEventListener("click", function () {
             var _a, _b;
-            var time = _this.getDateTimeObject(dateTimeInput.value);
             var offsetValue = Number(offsetInput.value);
             localStorage.setItem(offsetInput.id, offsetValue.toString());
             confirmButton.classList.add("btn-disabled");
-            var timeout = time
-                .plus({
-                milliseconds: unsafeWindow.Timing.getCurrentServerTime(),
-            })
-                .plus({ milliseconds: offsetValue });
+            var attackDateTime = luxon_1.DateTime.fromISO(dateTimeInput.value);
+            var serverDateTime = luxon_1.DateTime.fromMillis(unsafeWindow.Timing.getCurrentServerTime());
+            var timeoutDuration = attackDateTime.diff(serverDateTime);
+            var offset = luxon_1.Duration.fromMillis(offsetValue);
+            timeoutDuration = timeoutDuration.plus(offset);
             var checkedRadio = timeTypeGroupDiv.querySelector("input[type='radio']:checked");
             if ((checkedRadio === null || checkedRadio === void 0 ? void 0 : checkedRadio.id) === "".concat(timeTypeGroupName, "_arrival")) {
                 var dateArrivalTd = commandDataForm.querySelector("td[id='date_arrival']");
-                var durationTr = (_b = (_a = dateArrivalTd === null || dateArrivalTd === void 0 ? void 0 : dateArrivalTd.parentElement) === null || _a === void 0 ? void 0 : _a.parentElement) === null || _b === void 0 ? void 0 : _b.querySelectorAll("tr")[3];
-                var durationTd = durationTr === null || durationTr === void 0 ? void 0 : durationTr.querySelectorAll("td")[1];
-                var durationString = durationTd === null || durationTd === void 0 ? void 0 : durationTd.textContent;
-                if (!durationString) {
+                var attackDurationTr = (_b = (_a = dateArrivalTd === null || dateArrivalTd === void 0 ? void 0 : dateArrivalTd.parentElement) === null || _a === void 0 ? void 0 : _a.parentElement) === null || _b === void 0 ? void 0 : _b.querySelectorAll("tr")[3];
+                var attackDurationTd = attackDurationTr === null || attackDurationTr === void 0 ? void 0 : attackDurationTr.querySelectorAll("td")[1];
+                var attackDurationString = attackDurationTd === null || attackDurationTd === void 0 ? void 0 : attackDurationTd.textContent;
+                if (!attackDurationString) {
                     return;
                 }
-                var duration = luxon_1.DateTime.fromISO(durationString);
-                timeout.plus(duration);
+                var attackDurationArray = attackDurationString.split(":").map(Number);
+                var attackDuration = luxon_1.Duration.fromObject({
+                    hours: attackDurationArray[0],
+                    minutes: attackDurationArray[1],
+                    seconds: attackDurationArray[2],
+                });
+                timeoutDuration = timeoutDuration.minus(attackDuration.toMillis());
             }
             setTimeout(function () {
                 if (confirmButton instanceof HTMLElement) {
                     confirmButton.click();
                 }
-            }, timeout.toMillis());
+            }, timeoutDuration.toMillis());
             confirmSettingsButton.disabled = true;
         });
     },
@@ -116,6 +119,16 @@ var CommandSender = {
         var radioGroupDiv = document.createElement("div");
         radioGroupDiv.textContent = "Which time do you want to specify?";
         radioGroupDiv.append(document.createElement("br"));
+        var arrivalTimeRadio = document.createElement("input");
+        arrivalTimeRadio.type = "radio";
+        arrivalTimeRadio.name = groupName;
+        arrivalTimeRadio.id = "".concat(groupName, "_arrival");
+        arrivalTimeRadio.checked = true;
+        var arrivalTimeLabel = document.createElement("label");
+        arrivalTimeLabel.htmlFor = arrivalTimeRadio.id;
+        arrivalTimeLabel.textContent = "Arrival time";
+        radioGroupDiv.append(arrivalTimeRadio);
+        radioGroupDiv.append(arrivalTimeLabel);
         var sendTimeRadio = document.createElement("input");
         sendTimeRadio.type = "radio";
         sendTimeRadio.name = groupName;
@@ -125,15 +138,6 @@ var CommandSender = {
         sendTimeLabel.textContent = "Send time";
         radioGroupDiv.append(sendTimeRadio);
         radioGroupDiv.append(sendTimeLabel);
-        var arrivalTimeRadio = document.createElement("input");
-        arrivalTimeRadio.type = "radio";
-        arrivalTimeRadio.name = groupName;
-        arrivalTimeRadio.id = "".concat(groupName, "_arrival");
-        var arrivalTimeLabel = document.createElement("label");
-        arrivalTimeLabel.htmlFor = arrivalTimeRadio.id;
-        arrivalTimeLabel.textContent = "Arrival time";
-        radioGroupDiv.append(arrivalTimeRadio);
-        radioGroupDiv.append(arrivalTimeLabel);
         return radioGroupDiv;
     },
     createDateTimeInput: function () {
@@ -185,8 +189,9 @@ var CommandSender = {
     },
     setDateTime: function (dateTimeInput) {
         var now = luxon_1.DateTime.now();
-        var iso = now.toUTC().toISO();
-        dateTimeInput.value = iso.slice(0, -1);
+        var isoOptions = { includeOffset: false };
+        var iso = now.toISO(isoOptions);
+        dateTimeInput.value = iso;
     },
     setOffset: function (offsetInput) {
         var offsetInputId = offsetInput.id;
@@ -195,9 +200,6 @@ var CommandSender = {
         }
         var offsetValue = localStorage.getItem(offsetInputId) || "-250";
         offsetInput.value = offsetValue;
-    },
-    getDateTimeObject: function (dateTimeLocalValue) {
-        return luxon_1.DateTime.fromISO(dateTimeLocalValue).toLocal();
     },
     addFooter: function () {
         var serverInfoParagraph = document.querySelector("p[class='server_info']");
