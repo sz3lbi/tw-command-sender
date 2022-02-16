@@ -1,7 +1,7 @@
 # Tribal Wars Command Sender
 
 Automatic command sender for the Tribal Wars game.  
-You specify the arrival time, as well as the offset and an attack is sent automatically.
+You specify the arrival time or the send time, as well as the offset and an attack is sent automatically.
 
 The script has been written in the TypeScript language and is compiled to the JavaScript language (ES5) with suitable UserScript headers using webpack.
 

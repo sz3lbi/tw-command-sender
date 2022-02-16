@@ -4,6 +4,7 @@
     "lib": ["dom", "es7"],
     "resolveJsonModule": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true
   }

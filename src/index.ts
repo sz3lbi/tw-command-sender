@@ -1,3 +1,6 @@
+/// <reference types="./types/tampermonkey" />
+
+import { DateTime, Duration } from "luxon";
 import { CommandSender } from "./types/command-sender";
 
 const CommandSender: CommandSender = {
@@ -25,6 +28,10 @@ const CommandSender: CommandSender = {
     );
     commandDataForm.prepend(mainDiv);
 
+    const timeTypeGroupName = `${this.prefix}_time_type`;
+    const timeTypeGroupDiv = this.createTimeTypeRadioGroup(timeTypeGroupName);
+    mainDiv.prepend(timeTypeGroupDiv);
+
     this.setDateTime(dateTimeInput);
     this.setOffset(offsetInput);
 
@@ -36,20 +43,85 @@ const CommandSender: CommandSender = {
     }
 
     confirmSettingsButton.addEventListener("click", () => {
-      const attackTime = this.getDateObject(dateTimeInput.value).getTime();
-
       const offsetValue = Number(offsetInput.value);
       localStorage.setItem(offsetInput.id, offsetValue.toString());
 
       confirmButton.classList.add("btn-disabled");
+
+      const attackDateTime = DateTime.fromISO(dateTimeInput.value);
+      const serverDateTime = DateTime.fromMillis(
+        unsafeWindow.Timing.getCurrentServerTime()
+      );
+      let timeoutDuration = attackDateTime.diff(serverDateTime);
+
+      const offset = Duration.fromMillis(offsetValue);
+      timeoutDuration = timeoutDuration.plus(offset);
+
+      const checkedRadio = timeTypeGroupDiv.querySelector(
+        "input[type='radio']:checked"
+      );
+      if (checkedRadio?.id === `${timeTypeGroupName}_arrival`) {
+        const dateArrivalTd = commandDataForm.querySelector(
+          "td[id='date_arrival']"
+        );
+        const attackDurationTr =
+          dateArrivalTd?.parentElement?.parentElement?.querySelectorAll(
+            "tr"
+          )[3];
+        const attackDurationTd = attackDurationTr?.querySelectorAll("td")[1];
+        const attackDurationString = attackDurationTd?.textContent;
+
+        if (!attackDurationString) {
+          return;
+        }
+        const attackDurationArray = attackDurationString.split(":").map(Number);
+        const attackDuration = Duration.fromObject({
+          hours: attackDurationArray[0],
+          minutes: attackDurationArray[1],
+          seconds: attackDurationArray[2],
+        });
+        timeoutDuration = timeoutDuration.minus(attackDuration.toMillis());
+      }
+
       setTimeout(() => {
         if (confirmButton instanceof HTMLElement) {
           confirmButton.click();
         }
-      }, attackTime - window.unsafeWindow.Timing.getCurrentServerTime() + offsetValue);
+      }, timeoutDuration.toMillis());
 
       confirmSettingsButton.disabled = true;
     });
+  },
+  createTimeTypeRadioGroup: function (groupName) {
+    const radioGroupDiv = document.createElement("div");
+    radioGroupDiv.textContent = "Which time do you want to specify?";
+
+    radioGroupDiv.append(document.createElement("br"));
+
+    const arrivalTimeRadio = document.createElement("input");
+    arrivalTimeRadio.type = "radio";
+    arrivalTimeRadio.name = groupName;
+    arrivalTimeRadio.id = `${groupName}_arrival`;
+    arrivalTimeRadio.checked = true;
+    const arrivalTimeLabel = document.createElement("label");
+    arrivalTimeLabel.htmlFor = arrivalTimeRadio.id;
+    arrivalTimeLabel.textContent = "Arrival time";
+
+    radioGroupDiv.append(arrivalTimeRadio);
+    radioGroupDiv.append(arrivalTimeLabel);
+
+    const sendTimeRadio = document.createElement("input");
+    sendTimeRadio.type = "radio";
+    sendTimeRadio.name = groupName;
+    sendTimeRadio.id = `${groupName}_send`;
+    const sendTimeLabel = document.createElement("label");
+    sendTimeLabel.htmlFor = sendTimeRadio.id;
+    sendTimeLabel.textContent = "Send time";
+
+    radioGroupDiv.append(sendTimeRadio);
+    radioGroupDiv.append(sendTimeLabel);
+
+    return radioGroupDiv;
   },
   createDateTimeInput: function () {
     const datetimeInputId = `${this.prefix}_datetime`;
@@ -76,12 +148,13 @@ const CommandSender: CommandSender = {
   },
   createMainDiv: function (dateTimeInput, offsetInput, confirmButton) {
     const mainDiv = document.createElement("div");
+    mainDiv.id = `${this.prefix}_main`;
 
     const datetimeInputId = dateTimeInput.id;
     if (datetimeInputId) {
       const datetimeLabel = document.createElement("label");
       datetimeLabel.htmlFor = datetimeInputId;
-      datetimeLabel.textContent = "Arrival time: ";
+      datetimeLabel.textContent = "Time: ";
       mainDiv.append(datetimeLabel);
     }
     mainDiv.append(dateTimeInput);
@@ -102,7 +175,10 @@ const CommandSender: CommandSender = {
     return mainDiv;
   },
   setDateTime: function (dateTimeInput) {
-    dateTimeInput.value = this.getDateTimeString(new Date());
+    const now = DateTime.now();
+    const isoOptions = { includeOffset: false };
+    const iso = now.toISO(isoOptions);
+    dateTimeInput.value = iso;
   },
   setOffset: function (offsetInput) {
     const offsetInputId = offsetInput.id;
@@ -111,18 +187,6 @@ const CommandSender: CommandSender = {
     }
     const offsetValue = localStorage.getItem(offsetInputId) || "-250";
     offsetInput.value = offsetValue;
-  },
-  getDateTimeString: function (date) {
-    return new Date(date.getTime() - date.getTimezoneOffset() * 6e4)
-      .toISOString()
-      .slice(0, -1);
-  },
-  getDateObject: function (dateTimeLocalValue) {
-    const fakeUtcTime = new Date(`${dateTimeLocalValue}Z`);
-    const date = new Date(
-      fakeUtcTime.getTime() + fakeUtcTime.getTimezoneOffset() * 6e4
-    );
-    return date;
   },
   addFooter: function () {
     const serverInfoParagraph = document.querySelector(
