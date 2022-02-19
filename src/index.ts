@@ -64,13 +64,14 @@ const CommandSender: CommandSender = {
         const dateArrivalTd = commandDataForm.querySelector(
           "td[id='date_arrival']"
         );
-        const attackDurationTr =
-          dateArrivalTd?.parentElement?.parentElement?.querySelectorAll(
-            "tr"
-          )[3];
+        const commandTrs =
+          dateArrivalTd?.parentElement?.parentElement?.querySelectorAll("tr");
+        if (!commandTrs) {
+          return;
+        }
+        const attackDurationTr = commandTrs[commandTrs.length - 2];
         const attackDurationTd = attackDurationTr?.querySelectorAll("td")[1];
         const attackDurationString = attackDurationTd?.textContent;
-
         if (!attackDurationString) {
           return;
         }

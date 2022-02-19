@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name tw-command-sender
-// @version 1.1.0
+// @version 1.1.1
 // @description Automatic command sender for the Tribal Wars game
 // @author szelbi
 // @homepage https://github.com/sz3lbi/tw-command-sender
@@ -93,7 +93,11 @@ var CommandSender = {
             var checkedRadio = timeTypeGroupDiv.querySelector("input[type='radio']:checked");
             if ((checkedRadio === null || checkedRadio === void 0 ? void 0 : checkedRadio.id) === "".concat(timeTypeGroupName, "_arrival")) {
                 var dateArrivalTd = commandDataForm.querySelector("td[id='date_arrival']");
-                var attackDurationTr = (_b = (_a = dateArrivalTd === null || dateArrivalTd === void 0 ? void 0 : dateArrivalTd.parentElement) === null || _a === void 0 ? void 0 : _a.parentElement) === null || _b === void 0 ? void 0 : _b.querySelectorAll("tr")[3];
+                var commandTrs = (_b = (_a = dateArrivalTd === null || dateArrivalTd === void 0 ? void 0 : dateArrivalTd.parentElement) === null || _a === void 0 ? void 0 : _a.parentElement) === null || _b === void 0 ? void 0 : _b.querySelectorAll("tr");
+                if (!commandTrs) {
+                    return;
+                }
+                var attackDurationTr = commandTrs[commandTrs.length - 2];
                 var attackDurationTd = attackDurationTr === null || attackDurationTr === void 0 ? void 0 : attackDurationTr.querySelectorAll("td")[1];
                 var attackDurationString = attackDurationTd === null || attackDurationTd === void 0 ? void 0 : attackDurationTd.textContent;
                 if (!attackDurationString) {
