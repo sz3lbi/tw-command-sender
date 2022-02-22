@@ -61,21 +61,23 @@ const CommandSender: CommandSender = {
         "input[type='radio']:checked"
       );
       if (checkedRadio?.id === `${timeTypeGroupName}_arrival`) {
-        const dateArrivalTd = commandDataForm.querySelector(
-          "td[id='date_arrival']"
+        const closestTbody = commandDataForm.closest("tbody");
+        const commandTableTds = closestTbody?.querySelectorAll("td");
+        if (!commandTableTds) {
+          return;
+        }
+
+        const durationRegex = /^\d+\:\d{1,2}\:\d{1,2}$/;
+        const durationMatch = Array.from(commandTableTds).find((td) =>
+          durationRegex.test(td.textContent ?? "")
         );
-        const commandTrs =
-          dateArrivalTd?.parentElement?.parentElement?.querySelectorAll("tr");
-        if (!commandTrs) {
+        const attackDurationString = durationMatch?.textContent;
+        const attackDurationArray = attackDurationString
+          ?.split(":")
+          .map(Number);
+        if (!attackDurationArray) {
           return;
         }
-        const attackDurationTr = commandTrs[commandTrs.length - 2];
-        const attackDurationTd = attackDurationTr?.querySelectorAll("td")[1];
-        const attackDurationString = attackDurationTd?.textContent;
-        if (!attackDurationString) {
-          return;
-        }
-        const attackDurationArray = attackDurationString.split(":").map(Number);
         const attackDuration = Duration.fromObject({
           hours: attackDurationArray[0],
           minutes: attackDurationArray[1],

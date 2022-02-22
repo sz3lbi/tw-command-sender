@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name tw-command-sender
-// @version 1.1.1
+// @version 1.1.2
 // @description Automatic command sender for the Tribal Wars game
 // @author szelbi
 // @homepage https://github.com/sz3lbi/tw-command-sender
@@ -48,70 +48,110 @@ module.exports = luxon;
 /******/ 	}
 /******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/compat get default export */
+/******/ 	(() => {
+/******/ 		// getDefaultExport function for compatibility with non-harmony modules
+/******/ 		__webpack_require__.n = (module) => {
+/******/ 			var getter = module && module.__esModule ?
+/******/ 				() => (module['default']) :
+/******/ 				() => (module);
+/******/ 			__webpack_require__.d(getter, { a: getter });
+/******/ 			return getter;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__webpack_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/************************************************************************/
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
-var exports = __webpack_exports__;
-
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var luxon__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
+/* harmony import */ var luxon__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(luxon__WEBPACK_IMPORTED_MODULE_0__);
 /// <reference types="./types/tampermonkey" />
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-var luxon_1 = __webpack_require__(1);
-var CommandSender = {
+
+const CommandSender = {
     prefix: "command_sender",
     init: function (prefix) {
         if (prefix !== undefined) {
             this.prefix = prefix;
         }
-        var commandDataForm = document.querySelector("form[id='command-data-form']");
+        const commandDataForm = document.querySelector("form[id='command-data-form']");
         if (!commandDataForm) {
             return;
         }
-        var dateTimeInput = this.createDateTimeInput();
-        var offsetInput = this.createOffsetInput();
-        var confirmSettingsButton = this.createConfirmButton();
-        var mainDiv = this.createMainDiv(dateTimeInput, offsetInput, confirmSettingsButton);
+        const dateTimeInput = this.createDateTimeInput();
+        const offsetInput = this.createOffsetInput();
+        const confirmSettingsButton = this.createConfirmButton();
+        const mainDiv = this.createMainDiv(dateTimeInput, offsetInput, confirmSettingsButton);
         commandDataForm.prepend(mainDiv);
-        var timeTypeGroupName = "".concat(this.prefix, "_time_type");
-        var timeTypeGroupDiv = this.createTimeTypeRadioGroup(timeTypeGroupName);
+        const timeTypeGroupName = `${this.prefix}_time_type`;
+        const timeTypeGroupDiv = this.createTimeTypeRadioGroup(timeTypeGroupName);
         mainDiv.prepend(timeTypeGroupDiv);
         this.setDateTime(dateTimeInput);
         this.setOffset(offsetInput);
-        var confirmButton = commandDataForm.querySelector("input[id='troop_confirm_submit']");
+        const confirmButton = commandDataForm.querySelector("input[id='troop_confirm_submit']");
         if (!confirmButton) {
             return;
         }
-        confirmSettingsButton.addEventListener("click", function () {
-            var _a, _b;
-            var offsetValue = Number(offsetInput.value);
+        confirmSettingsButton.addEventListener("click", () => {
+            const offsetValue = Number(offsetInput.value);
             localStorage.setItem(offsetInput.id, offsetValue.toString());
             confirmButton.classList.add("btn-disabled");
-            var attackDateTime = luxon_1.DateTime.fromISO(dateTimeInput.value);
-            var serverDateTime = luxon_1.DateTime.fromMillis(unsafeWindow.Timing.getCurrentServerTime());
-            var timeoutDuration = attackDateTime.diff(serverDateTime);
-            var offset = luxon_1.Duration.fromMillis(offsetValue);
+            const attackDateTime = luxon__WEBPACK_IMPORTED_MODULE_0__.DateTime.fromISO(dateTimeInput.value);
+            const serverDateTime = luxon__WEBPACK_IMPORTED_MODULE_0__.DateTime.fromMillis(unsafeWindow.Timing.getCurrentServerTime());
+            let timeoutDuration = attackDateTime.diff(serverDateTime);
+            const offset = luxon__WEBPACK_IMPORTED_MODULE_0__.Duration.fromMillis(offsetValue);
             timeoutDuration = timeoutDuration.plus(offset);
-            var checkedRadio = timeTypeGroupDiv.querySelector("input[type='radio']:checked");
-            if ((checkedRadio === null || checkedRadio === void 0 ? void 0 : checkedRadio.id) === "".concat(timeTypeGroupName, "_arrival")) {
-                var dateArrivalTd = commandDataForm.querySelector("td[id='date_arrival']");
-                var commandTrs = (_b = (_a = dateArrivalTd === null || dateArrivalTd === void 0 ? void 0 : dateArrivalTd.parentElement) === null || _a === void 0 ? void 0 : _a.parentElement) === null || _b === void 0 ? void 0 : _b.querySelectorAll("tr");
-                if (!commandTrs) {
+            const checkedRadio = timeTypeGroupDiv.querySelector("input[type='radio']:checked");
+            if ((checkedRadio === null || checkedRadio === void 0 ? void 0 : checkedRadio.id) === `${timeTypeGroupName}_arrival`) {
+                const closestTbody = commandDataForm.closest("tbody");
+                const commandTableTds = closestTbody === null || closestTbody === void 0 ? void 0 : closestTbody.querySelectorAll("td");
+                if (!commandTableTds) {
                     return;
                 }
-                var attackDurationTr = commandTrs[commandTrs.length - 2];
-                var attackDurationTd = attackDurationTr === null || attackDurationTr === void 0 ? void 0 : attackDurationTr.querySelectorAll("td")[1];
-                var attackDurationString = attackDurationTd === null || attackDurationTd === void 0 ? void 0 : attackDurationTd.textContent;
-                if (!attackDurationString) {
+                const durationRegex = /^\d+\:\d{1,2}\:\d{1,2}$/;
+                const durationMatch = Array.from(commandTableTds).find((td) => { var _a; return durationRegex.test((_a = td.textContent) !== null && _a !== void 0 ? _a : ""); });
+                const attackDurationString = durationMatch === null || durationMatch === void 0 ? void 0 : durationMatch.textContent;
+                const attackDurationArray = attackDurationString === null || attackDurationString === void 0 ? void 0 : attackDurationString.split(":").map(Number);
+                if (!attackDurationArray) {
                     return;
                 }
-                var attackDurationArray = attackDurationString.split(":").map(Number);
-                var attackDuration = luxon_1.Duration.fromObject({
+                const attackDuration = luxon__WEBPACK_IMPORTED_MODULE_0__.Duration.fromObject({
                     hours: attackDurationArray[0],
                     minutes: attackDurationArray[1],
                     seconds: attackDurationArray[2],
                 });
                 timeoutDuration = timeoutDuration.minus(attackDuration.toMillis());
             }
-            setTimeout(function () {
+            setTimeout(() => {
                 if (confirmButton instanceof HTMLElement) {
                     confirmButton.click();
                 }
@@ -120,24 +160,24 @@ var CommandSender = {
         });
     },
     createTimeTypeRadioGroup: function (groupName) {
-        var radioGroupDiv = document.createElement("div");
+        const radioGroupDiv = document.createElement("div");
         radioGroupDiv.textContent = "Which time do you want to specify?";
         radioGroupDiv.append(document.createElement("br"));
-        var arrivalTimeRadio = document.createElement("input");
+        const arrivalTimeRadio = document.createElement("input");
         arrivalTimeRadio.type = "radio";
         arrivalTimeRadio.name = groupName;
-        arrivalTimeRadio.id = "".concat(groupName, "_arrival");
+        arrivalTimeRadio.id = `${groupName}_arrival`;
         arrivalTimeRadio.checked = true;
-        var arrivalTimeLabel = document.createElement("label");
+        const arrivalTimeLabel = document.createElement("label");
         arrivalTimeLabel.htmlFor = arrivalTimeRadio.id;
         arrivalTimeLabel.textContent = "Arrival time";
         radioGroupDiv.append(arrivalTimeRadio);
         radioGroupDiv.append(arrivalTimeLabel);
-        var sendTimeRadio = document.createElement("input");
+        const sendTimeRadio = document.createElement("input");
         sendTimeRadio.type = "radio";
         sendTimeRadio.name = groupName;
-        sendTimeRadio.id = "".concat(groupName, "_send");
-        var sendTimeLabel = document.createElement("label");
+        sendTimeRadio.id = `${groupName}_send`;
+        const sendTimeLabel = document.createElement("label");
         sendTimeLabel.htmlFor = sendTimeRadio.id;
         sendTimeLabel.textContent = "Send time";
         radioGroupDiv.append(sendTimeRadio);
@@ -145,43 +185,43 @@ var CommandSender = {
         return radioGroupDiv;
     },
     createDateTimeInput: function () {
-        var datetimeInputId = "".concat(this.prefix, "_datetime");
-        var datetimeInput = document.createElement("input");
+        const datetimeInputId = `${this.prefix}_datetime`;
+        const datetimeInput = document.createElement("input");
         datetimeInput.id = datetimeInputId;
         datetimeInput.type = "datetime-local";
         datetimeInput.step = ".001";
         return datetimeInput;
     },
     createOffsetInput: function () {
-        var offsetInputId = "".concat(this.prefix, "_offset");
-        var offsetInput = document.createElement("input");
+        const offsetInputId = `${this.prefix}_offset`;
+        const offsetInput = document.createElement("input");
         offsetInput.id = offsetInputId;
         offsetInput.type = "number";
         return offsetInput;
     },
     createConfirmButton: function () {
-        var confirmSettingsButtonId = "".concat(this.prefix, "_confirm");
-        var confirmSettingsButton = document.createElement("input");
+        const confirmSettingsButtonId = `${this.prefix}_confirm`;
+        const confirmSettingsButton = document.createElement("input");
         confirmSettingsButton.id = confirmSettingsButtonId;
         confirmSettingsButton.type = "button";
         confirmSettingsButton.value = "Confirm settings";
         return confirmSettingsButton;
     },
     createMainDiv: function (dateTimeInput, offsetInput, confirmButton) {
-        var mainDiv = document.createElement("div");
-        mainDiv.id = "".concat(this.prefix, "_main");
-        var datetimeInputId = dateTimeInput.id;
+        const mainDiv = document.createElement("div");
+        mainDiv.id = `${this.prefix}_main`;
+        const datetimeInputId = dateTimeInput.id;
         if (datetimeInputId) {
-            var datetimeLabel = document.createElement("label");
+            const datetimeLabel = document.createElement("label");
             datetimeLabel.htmlFor = datetimeInputId;
             datetimeLabel.textContent = "Time: ";
             mainDiv.append(datetimeLabel);
         }
         mainDiv.append(dateTimeInput);
         mainDiv.append(document.createElement("br"));
-        var offsetInputId = offsetInput.id;
+        const offsetInputId = offsetInput.id;
         if (offsetInputId) {
-            var offsetLabel = document.createElement("label");
+            const offsetLabel = document.createElement("label");
             offsetLabel.htmlFor = offsetInputId;
             offsetLabel.textContent = "Offset (ms): ";
             mainDiv.append(offsetLabel);
@@ -192,35 +232,35 @@ var CommandSender = {
         return mainDiv;
     },
     setDateTime: function (dateTimeInput) {
-        var now = luxon_1.DateTime.now();
-        var isoOptions = { includeOffset: false };
-        var iso = now.toISO(isoOptions);
+        const now = luxon__WEBPACK_IMPORTED_MODULE_0__.DateTime.now();
+        const isoOptions = { includeOffset: false };
+        const iso = now.toISO(isoOptions);
         dateTimeInput.value = iso;
     },
     setOffset: function (offsetInput) {
-        var offsetInputId = offsetInput.id;
+        const offsetInputId = offsetInput.id;
         if (!offsetInputId) {
             return;
         }
-        var offsetValue = localStorage.getItem(offsetInputId) || "-250";
+        const offsetValue = localStorage.getItem(offsetInputId) || "-250";
         offsetInput.value = offsetValue;
     },
     addFooter: function () {
-        var serverInfoParagraph = document.querySelector("p[class='server_info']");
-        var footerSpan = document.createElement("span");
+        const serverInfoParagraph = document.querySelector("p[class='server_info']");
+        const footerSpan = document.createElement("span");
         footerSpan.style.cssFloat = "left";
-        var footerName = document.createElement("b");
+        const footerName = document.createElement("b");
         footerName.textContent = "tw-command-sender";
-        var footerUrl = document.createElement("a");
+        const footerUrl = document.createElement("a");
         footerUrl.textContent = "szelbi.ovh";
         footerUrl.href = "https://szelbi.ovh/";
         footerUrl.target = "_blank";
-        footerSpan.innerHTML = "".concat(footerName.outerHTML, " by szelbi (").concat(footerUrl.outerHTML, ")");
+        footerSpan.innerHTML = `${footerName.outerHTML} by szelbi (${footerUrl.outerHTML})`;
         serverInfoParagraph === null || serverInfoParagraph === void 0 ? void 0 : serverInfoParagraph.prepend(footerSpan);
     },
 };
-var url = window.location.href;
-var urlRegex = /^.*:\/\/.*\/game\.php.*screen=place.*try=confirm.*$/;
+const url = window.location.href;
+const urlRegex = /^.*:\/\/.*\/game\.php.*screen=place.*try=confirm.*$/;
 if (urlRegex.test(url)) {
     CommandSender.init();
     CommandSender.addFooter();
