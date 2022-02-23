@@ -61,7 +61,10 @@ const CommandSender: CommandSender = {
         "input[type='radio']:checked"
       );
       if (checkedRadio?.id === `${timeTypeGroupName}_arrival`) {
-        const closestTbody = commandDataForm.closest("tbody");
+        const dateArrivalTd = commandDataForm.querySelector(
+          "td[id='date_arrival']"
+        );
+        const closestTbody = dateArrivalTd?.closest("tbody");
         const commandTableTds = closestTbody?.querySelectorAll("td");
         if (!commandTableTds) {
           return;
